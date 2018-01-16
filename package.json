@@ -1,0 +1,22 @@
+{
+  "name": "arbitrage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "kucoin_trading_script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/addriv/arbitrage.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/addriv/arbitrage/issues"
+  },
+  "homepage": "https://github.com/addriv/arbitrage#readme",
+  "dependencies": {
+    "axios": "^0.17.1"
+  }
+}
