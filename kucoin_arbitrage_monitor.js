@@ -58,7 +58,7 @@ function calculateArbitrage(ratios){
   console.log(`Traded To: ${arbitrageVolume}${ARBITRAGE_COIN} || Ratio: ${arbitrageOutputRatio} ${ARBITRAGE_COIN}-${OUTPUT_COIN}`);
   console.log(`Traded To: ${outputVolume}${OUTPUT_COIN} || Ratio: ${outputInputRatio} ${OUTPUT_COIN}-${INPUT_COIN}`);
   console.log(`End Result: ${newInputVolume}${INPUT_COIN}`);
-  console.log(`${tradeStatus}!! Net Change: ${netChange}${INPUT_COIN} || %Change: ${netPctChange}%`);
+  console.log(`${tradeStatus}!! Net Change: ${netChange}${INPUT_COIN} || %Change: ${netPctChange.toFixed(2)}%`);
   console.log('-------------------------------------------------------------------');
 }
 
