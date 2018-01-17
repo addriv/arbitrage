@@ -63,14 +63,42 @@ function calculateArbitrage(ratios){
 }
 
 // On an interval at given delay, run API requests through currying function
-function runMonitor(msDelay){
+function monitor(msDelay){
+  setInterval(() => {
+    let runCurry = ajaxCurry();
+    const arbitrageInputURI = uris['arbitrageInputURI'];
+    const arbitrageOutputURI = uris['arbitrageOutputURI'];
+    const outputInputURI = uris['outputInputURI'];
+
+    // First trade: Trade input coin and buy arbitrage coin, EX: BTC to DBC
+    axios.get(arbitrageInputURI).then(response => {
+      // For instant transaction, buy at ask price = lowest seller price
+      const ratio = response['data']['data']['sell'];
+      runCurry({ 'ratioType': 'arbitrageInput', ratio });
+    });
+
+    // Second trade: Trade arbitrage coin for output coin, EX: DBC to NEO
+    axios.get(arbitrageOutputURI).then(response => {
+      // For instant transaction, sell at bid price = highest buyer price
+      const ratio = response['data']['data']['buy'];
+      runCurry({ 'ratioType': 'arbitrageOutput', ratio });
+    });
+
+    // Last trade: Trade output coin back to input coin, EX: NEO back to BTC
+    axios.get(outputInputURI).then(response => {
+      // For instant transaction, sell at bid price = highest buyer price
+      const ratio = response['data']['data']['buy'];
+      runCurry({ 'ratioType': 'outputInput', ratio });
+    });
+  }, msDelay);
+}
+
+// Uses last trade price for ratios
+function monitorLastPrice(msDelay) {
   setInterval(() => {
     let runCurry = ajaxCurry();
 
-    const arbitrageInputURI = uris['arbitrageInputURI'];
-    axios.get()
-
-    for (let i = 0; i < RATIO_TYPES.length; i++){
+    for (let i = 0; i < RATIO_TYPES.length; i++) {
       const ratioType = RATIO_TYPES[i];
       const uri = uris[`${ratioType}URI`];
       axios.get(uri).then(response => {
@@ -86,4 +114,5 @@ function runMonitor(msDelay){
   }, msDelay);
 }
 
-runMonitor(1000);
+
+monitor(1000);
