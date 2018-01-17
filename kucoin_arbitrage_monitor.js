@@ -94,9 +94,6 @@ function processInput(text) {
   });
 }
 
-
-
-
 // On an interval at given delay, run API requests through currying function
 function monitor(msDelay){
   setInterval(() => {
@@ -151,12 +148,18 @@ function monitorLastPrice(msDelay) {
 
 function currentDate(){
   const dateTime = new Date();
-  const day = dateTime.getDate();
-  const month = dateTime.getMonth();
-  const year = dateTime.getFullYear();
-  const hour = dateTime.getHours();
-  const minutes = dateTime.getMinutes();
-  const seconds = dateTime.getSeconds();
+  let day = dateTime.getDate();
+  let month = dateTime.getMonth();
+  const year = dateTime.getFullYear().toString().slice(2);
+  let hour = dateTime.getHours();
+  let minutes = dateTime.getMinutes();
+  let seconds = dateTime.getSeconds();
+
+  month = month.length === 1 ? `${0}${month}` : month;
+  day = day.length === 1 ? `${0}${day}` : day;
+  hour = hour.length === 1 ? `${0}${hour}` : hour;
+  minutes = minutes.length === 1 ? `${0}${minutes}` : minutes;
+  seconds = seconds.length === 1 ? `${0}${seconds}` : seconds;
 
   return `${month}/${day}/${year} ${hour}:${minutes}:${seconds}`;
 }
