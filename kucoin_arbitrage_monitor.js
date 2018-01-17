@@ -149,7 +149,7 @@ function monitorLastPrice(msDelay) {
 function currentDate(){
   const dateTime = new Date();
   let day = dateTime.getDate();
-  let month = dateTime.getMonth();
+  let month = dateTime.getMonth() + 1;
   const year = dateTime.getFullYear().toString().slice(2);
   let hour = dateTime.getHours();
   let minutes = dateTime.getMinutes();
