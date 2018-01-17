@@ -28,7 +28,8 @@ function ajaxCurry() {
 
     // Run calculate after all 3 responses come back
     if (Object.keys(ratios).length === 3) {
-      calculateArbitrage(ratios);
+      const data = calculateArbitrage(ratios);
+      runLogger(data);
     }
     else { 
       return _curriedFn;
@@ -53,7 +54,10 @@ function calculateArbitrage(ratios){
   const netPctChange = netChange / INPUT_VOLUME * 100;
   const tradeStatus = newInputVolume > 1 ? 'PROFIT' : 'LOSS';
 
-  const data = {
+  return {
+    arbitrageInputRatio,
+    arbitrageOutputRatio,
+    outputInputRatio,
     arbitrageVolume,
     outputVolume,
     newInputVolume,
@@ -61,21 +65,24 @@ function calculateArbitrage(ratios){
     netPctChange,
     tradeStatus
   };
-
-  // Print results
-  console.log('-------------------------------------------------------------------');
-  console.log(`Starting Currency: ${INPUT_VOLUME}${INPUT_COIN} || Ratio: ${arbitrageInputRatio} ${ARBITRAGE_COIN}-${INPUT_COIN}`);
-  console.log(`Traded To ${ARBITRAGE_COIN}: ${arbitrageVolume}${ARBITRAGE_COIN} || Ratio: ${arbitrageOutputRatio} ${ARBITRAGE_COIN}-${OUTPUT_COIN}`);
-  console.log(`Traded To ${OUTPUT_COIN}: ${outputVolume}${OUTPUT_COIN} || Ratio: ${outputInputRatio} ${OUTPUT_COIN}-${INPUT_COIN}`);
-  console.log(`End Result ${INPUT_COIN}: ${newInputVolume}${INPUT_COIN}`);
-  console.log(`${tradeStatus}!! Net Change: ${netChange}${INPUT_COIN} || %Change: ${netPctChange.toFixed(2)}%`);
-  console.log('-------------------------------------------------------------------');
-
-  return netPctChange;
 }
 
-function runLogger(ratios){
-  calculateArbitrage(ratios);
+function runLogger(data){
+  // Print results
+  console.log('-------------------------------------------------------------------');
+  console.log(`Starting Currency: ${INPUT_VOLUME}${INPUT_COIN} || Ratio: ${data.arbitrageInputRatio} ${ARBITRAGE_COIN}-${INPUT_COIN}`);
+  console.log(`Traded To ${ARBITRAGE_COIN}: ${data.arbitrageVolume}${ARBITRAGE_COIN} || Ratio: ${data.arbitrageOutputRatio} ${ARBITRAGE_COIN}-${OUTPUT_COIN}`);
+  console.log(`Traded To ${OUTPUT_COIN}: ${data.outputVolume}${OUTPUT_COIN} || Ratio: ${data.outputInputRatio} ${OUTPUT_COIN}-${INPUT_COIN}`);
+  console.log(`End Result ${INPUT_COIN}: ${data.newInputVolume}${INPUT_COIN}`);
+  console.log(`${data.tradeStatus}!! Net Change: ${data.netChange}${INPUT_COIN} || %Change: ${data.netPctChange.toFixed(2)}%`);
+  console.log('-------------------------------------------------------------------');
+
+  const writeOutput = `${currentDate()} => ${data.netPctChange.toFixed(2)}%`;
+
+  
+  fs.writeFile('historical_data.txt', writeOutput, err => {
+    if (err) console.log("Error writing to file...");
+  });
 }
 
 // On an interval at given delay, run API requests through currying function
