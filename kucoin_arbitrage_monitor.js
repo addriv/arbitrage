@@ -4,8 +4,8 @@ const axios = require('axios');
 const INPUT_COIN = 'BTC'; // Starting currency
 const OUTPUT_COIN = 'NEO'; // End currency to trade back for starting currency
 const ARBITRAGE_COIN = 'DBC'; // Currency bought with start and traded for end currency
-const TRADING_FEE_PCT = 0.1;
-const INPUT_VOLUME = 1;
+const TRADING_FEE_PCT = 0.1; // Kucoin trading fee = 0.1%
+const INPUT_VOLUME = 1; // Test volume, number of input coins to start
 const REQUEST_RATE = 1000; //ms
 const RATIO_TYPES = ['arbitrageInput', 'arbitrageOutput', 'outputInput'];
 
@@ -16,16 +16,8 @@ const uris = {
   'outputInputURI': `https://api.kucoin.com/v1/open/tick?symbol=${OUTPUT_COIN}-${INPUT_COIN}`
 };
 
-// Ex: ETH/BTC, ETH = base, BTC = quote
-function getRatio(baseCoin, quoteCoin) {
-  const uri = `https://api.kucoin.com/v1/open/tick?symbol=${baseCoin}-${quoteCoin}`;
-  axios.get(uri).then((response) => {
-    const ratio = response['data']['data']['lastDealPrice'];
-  });
-}
-
-// Run all 3 HTTP requests asynchronously
-// Wait until all 3 responses come back before running calculation function
+// Currying function for running asynchronous API requests
+// Runs calculation function after all responses have been received
 function ajaxCurry() {
   const ratios = {};
 
@@ -70,8 +62,8 @@ function calculateArbitrage(ratios){
   console.log('-------------------------------------------------------------------');
 }
 
+// On an interval at given delay, run API requests through currying function
 function runMonitor(msDelay){
-  // On an interval at given delay, run API requests through currying function
   setInterval(() => {
     let runCurry = ajaxCurry();
 
