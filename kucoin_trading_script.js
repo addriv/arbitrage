@@ -6,12 +6,15 @@ const OUTPUT_COIN = 'NEO';
 const ARBITRAGE_COIN = 'DBC';
 const TRADING_FEE_PCT = 0.1;
 const INPUT_VOLUME = 1;
-const requestRate = 1000; //ms
+const REQUEST_RATE = 1000; //ms
+const RATIO_TYPES = ['arbitrageInput', 'arbitrageOutput', 'outputInput'];
 
 // URIs
-const arbitrageInputURI = `https://api.kucoin.com/v1/open/tick?symbol=${arbitrageCoin}-${inputCoin}`;
-const arbitrageOutputURI = `https://api.kucoin.com/v1/open/tick?symbol=${arbitrageCoin}-${outputCoin}`;
-const outputInputURI = `https://api.kucoin.com/v1/open/tick?symbol=${outputCoin}-${inputCoin}`;
+const uris = {
+  'arbitrageInputURI': `https://api.kucoin.com/v1/open/tick?symbol=${ARBITRAGE_COIN}-${INPUT_COIN}`,
+  'arbitrageOutputURI': `https://api.kucoin.com/v1/open/tick?symbol=${ARBITRAGE_COIN}-${OUTPUT_COIN}`,
+  'outputInputURI': `https://api.kucoin.com/v1/open/tick?symbol=${OUTPUT_COIN}-${INPUT_COIN}`
+};
 
 // Ex: ETH/BTC, ETH = base, BTC = quote
 function getRatio(baseCoin, quoteCoin) {
@@ -26,38 +29,32 @@ function getRatio(baseCoin, quoteCoin) {
 function ajaxCurry() {
   const ratios = {};
 
-  function _curriedFn(ratioType, baseCoin, quoteCoin) {
-    const types = ['arbitrageInput', 'arbitrageOutput', 'outputInput'];
-    if (!types.includes(ratioType)) return console.log("Error: ratioType not found");
+  function _curriedFn(response) {
+    // if (!RATIO_TYPES.includes(ratioType)) return console.log("Error: ratioType not found");    
+    ratios[response['ratioType']] = response['ratio'];
 
-    const uri = `https://api.kucoin.com/v1/open/tick?symbol=${baseCoin}-${quoteCoin}`;
-    axios.get(uri).then((response) => {
-      const ratio = response['data']['data']['lastDealPrice'];
-      const tradingPair = `${baseCoin}-${quoteCoin}`;
-      const data = {
-        tradingPair,
-        ratio
-      };
-
-      ratios[ratioType] = data; 
-    });
+    // Run calculate after all 3 responses come back
+    if (Object.keys(ratios).length === 3) {
+      calculateArbitrage(ratios);
+    }
+    else { 
+      return _curriedFn;
+    }
   }
 
-  // Run calculate after all 3 responses come back
-  if (Object.keys(ratios).length === 3) {
-    calculateArbitrage(ratios);
-  }
-  else { 
-    return _curriedFn;
-  }
+  return _curriedFn;
 }
 
 function calculateArbitrage(ratios){
+  // TESTING
+  console.log(ratios);
+  // TESTING
+  
   // constants
   const arbitrageInputRatio = ratios['arbitrageInput']['ratio'];
   const arbitrageOutputRatio = ratios['arbitrageOutput']['ratio'];
   const outputInputRatio = ratios['outputInput']['ratio'];
-  const netAfterFeeFactor = 1 - (tradingFeePct / 100);
+  const netAfterFeeFactor = 1 - (TRADING_FEE_PCT / 100);
 
   // calculations
   const arbitrageVolume = INPUT_VOLUME / arbitrageInputRatio * netAfterFeeFactor;
@@ -74,9 +71,20 @@ function calculateArbitrage(ratios){
 function monitorArbitrage(msDelay){
   setInterval(() => {
     let runCurry = ajaxCurry();
-    runCurry = runCurry('arbitrageInput', ARBITRAGE_COIN, INPUT_COIN);
-    runCurry = runCurry('arbitrageOutput', ARBITRAGE_COIN, OUTPUT_COIN);
-    runCurry = runCurry('outputInput', OUTPUT_COIN, INPUT_COIN);
+
+    for (let i = 0; i < RATIO_TYPES.length; i++){
+      const ratioType = RATIO_TYPES[i];
+      const uri = uris[`${ratioType}URI`];
+      axios.get(uri).then(response => {
+        const ratio = response['data']['data']['lastDealPrice'];
+        const data = {
+          ratioType,
+          ratio
+        };
+
+        runCurry(data);
+      });
+    }
   }, msDelay);
 }
 
