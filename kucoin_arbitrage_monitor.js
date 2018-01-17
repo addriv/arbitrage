@@ -67,6 +67,9 @@ function runMonitor(msDelay){
   setInterval(() => {
     let runCurry = ajaxCurry();
 
+    const arbitrageInputURI = uris['arbitrageInputURI'];
+    axios.get()
+
     for (let i = 0; i < RATIO_TYPES.length; i++){
       const ratioType = RATIO_TYPES[i];
       const uri = uris[`${ratioType}URI`];
