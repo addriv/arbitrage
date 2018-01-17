@@ -1,9 +1,9 @@
 const axios = require('axios');
 
 // Constants
-const INPUT_COIN = 'BTC';
-const OUTPUT_COIN = 'NEO';
-const ARBITRAGE_COIN = 'DBC';
+const INPUT_COIN = 'BTC'; // Starting currency
+const OUTPUT_COIN = 'NEO'; // End currency to trade back for starting currency
+const ARBITRAGE_COIN = 'DBC'; // Currency bought with start and traded for end currency
 const TRADING_FEE_PCT = 0.1;
 const INPUT_VOLUME = 1;
 const REQUEST_RATE = 1000; //ms
@@ -45,18 +45,14 @@ function ajaxCurry() {
   return _curriedFn;
 }
 
-function calculateArbitrage(ratios){
-  // TESTING
-  console.log(ratios);
-  // TESTING
-  
-  // constants
-  const arbitrageInputRatio = ratios['arbitrageInput']['ratio'];
-  const arbitrageOutputRatio = ratios['arbitrageOutput']['ratio'];
-  const outputInputRatio = ratios['outputInput']['ratio'];
+function calculateArbitrage(ratios){  
+  // Constants
+  const arbitrageInputRatio = ratios['arbitrageInput'];
+  const arbitrageOutputRatio = ratios['arbitrageOutput'];
+  const outputInputRatio = ratios['outputInput'];
   const netAfterFeeFactor = 1 - (TRADING_FEE_PCT / 100);
 
-  // calculations
+  // Calculations
   const arbitrageVolume = INPUT_VOLUME / arbitrageInputRatio * netAfterFeeFactor;
   const outputVolume = arbitrageVolume * arbitrageOutputRatio * netAfterFeeFactor;
   const newInputVolume = outputVolume * outputInputRatio * netAfterFeeFactor;
@@ -64,11 +60,18 @@ function calculateArbitrage(ratios){
   const netPctChange = netChange / INPUT_VOLUME * 100;
   const tradeStatus = newInputVolume > 1 ? 'PROFIT' : 'LOSS';
 
-  // print results
-  console.log(`${tradeStatus}!! Start: ${INPUT_VOLUME}${INPUT_COIN} => New Total: ${newInputVolume}${INPUT_COIN} => Net Change: ${netChange} => %Change: ${netPctChange}`);
+  // Print results
+  console.log('-------------------------------------------------------------------');
+  console.log(`Starting Currency: ${INPUT_VOLUME}${INPUT_COIN} || Ratio: ${arbitrageInputRatio} ${ARBITRAGE_COIN}-${INPUT_COIN})`);
+  console.log(`Traded To: ${arbitrageVolume}${ARBITRAGE_COIN} || Ratio: ${arbitrageOutputRatio} ${ARBITRAGE_COIN}-${OUTPUT_COIN}`);
+  console.log(`Traded To: ${outputVolume}${OUTPUT_COIN} || Ratio: ${outputInputRatio} ${OUTPUT_COIN}-${INPUT_COIN}`);
+  console.log(`End Result: ${newInputVolume}${INPUT_COIN}`);
+  console.log(`${tradeStatus}!! Net Change: ${netChange}${INPUT_COIN} || %Change: ${netPctChange}%`);
+  console.log('-------------------------------------------------------------------');
 }
 
-function monitorArbitrage(msDelay){
+function runMonitor(msDelay){
+  // On an interval at given delay, run API requests through currying function
   setInterval(() => {
     let runCurry = ajaxCurry();
 
@@ -88,4 +91,4 @@ function monitorArbitrage(msDelay){
   }, msDelay);
 }
 
-monitorArbitrage(1000);
+runMonitor(1000);
