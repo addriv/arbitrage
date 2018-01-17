@@ -1,4 +1,5 @@
 const axios = require('axios');
+const fs = require('fs');
 
 // Constants
 const INPUT_COIN = 'BTC'; // Starting currency
@@ -52,6 +53,15 @@ function calculateArbitrage(ratios){
   const netPctChange = netChange / INPUT_VOLUME * 100;
   const tradeStatus = newInputVolume > 1 ? 'PROFIT' : 'LOSS';
 
+  const data = {
+    arbitrageVolume,
+    outputVolume,
+    newInputVolume,
+    netChange,
+    netPctChange,
+    tradeStatus
+  };
+
   // Print results
   console.log('-------------------------------------------------------------------');
   console.log(`Starting Currency: ${INPUT_VOLUME}${INPUT_COIN} || Ratio: ${arbitrageInputRatio} ${ARBITRAGE_COIN}-${INPUT_COIN}`);
@@ -60,6 +70,12 @@ function calculateArbitrage(ratios){
   console.log(`End Result ${INPUT_COIN}: ${newInputVolume}${INPUT_COIN}`);
   console.log(`${tradeStatus}!! Net Change: ${netChange}${INPUT_COIN} || %Change: ${netPctChange.toFixed(2)}%`);
   console.log('-------------------------------------------------------------------');
+
+  return netPctChange;
+}
+
+function runLogger(ratios){
+  calculateArbitrage(ratios);
 }
 
 // On an interval at given delay, run API requests through currying function
@@ -114,5 +130,17 @@ function monitorLastPrice(msDelay) {
   }, msDelay);
 }
 
+function currentDate(){
+  const dateTime = new Date();
+  const day = dateTime.getDate();
+  const month = dateTime.getMonth();
+  const year = dateTime.getFullYear();
+  const hour = dateTime.getHours();
+  const minutes = dateTime.getMinutes();
+  const seconds = dateTime.getSeconds();
 
-monitor(1000);
+  return `${month}/${day}/${year} ${hour}:${minutes}:${seconds}`;
+}
+
+monitor(REQUEST_RATE);
+// monitorLastPrice(REQUEST_RATE);
