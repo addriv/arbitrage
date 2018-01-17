@@ -77,13 +77,25 @@ function runLogger(data){
   console.log(`${data.tradeStatus}!! Net Change: ${data.netChange}${INPUT_COIN} || %Change: ${data.netPctChange.toFixed(2)}%`);
   console.log('-------------------------------------------------------------------');
 
-  const writeOutput = `${currentDate()} => ${data.netPctChange.toFixed(2)}%`;
-
   
-  fs.writeFile('historical_data.txt', writeOutput, err => {
+  const writeOutput = `${currentDate()} => ${data.netPctChange.toFixed(2)}%\n`;
+  fs.appendFile('historical_data.txt', writeOutput, err => {
     if (err) console.log("Error writing to file...");
   });
 }
+
+function processInput(text) {
+  fs.open('H://log.txt', 'a', 666, function (e, id) {
+    fs.write(id, text + os.EOL, null, 'utf8', function () {
+      fs.close(id, function () {
+        console.log('file is updated');
+      });
+    });
+  });
+}
+
+
+
 
 // On an interval at given delay, run API requests through currying function
 function monitor(msDelay){
