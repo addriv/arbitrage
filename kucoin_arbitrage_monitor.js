@@ -3,7 +3,7 @@ const fs = require('fs');
 
 // Constants
 const INPUT_COIN = 'BTC'; // Starting currency
-const OUTPUT_COIN = 'ETH'; // End currency to trade back for starting currency
+const OUTPUT_COIN = 'NEO'; // End currency to trade back for starting currency
 const ARBITRAGE_COIN = 'DBC'; // Currency bought with start and traded for end currency
 const TRADING_FEE_PCT = 0.1; // Kucoin trading fee = 0.1%
 const INPUT_VOLUME = 1; // Test volume, number of input coins to start
